@@ -52,7 +52,7 @@ function _worktree_remove(){
 }
 
 function _code(){
-   compadd $~WORKTREE_CODE_DIR
+   compadd $~=WORKTREE_CODE_DIR
 }
 
 function confirm(){
