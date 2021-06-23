@@ -5,19 +5,32 @@ WORKTREE_CODE_DIR=${WORKTREE_CODE_DIR:-../*}
 WORKTREE_POST_SWITCH=${WORKTREE_POST_SWITCH:-echo switched}
 WORKTREE_POST_CREATE=${WORKTREE_POST_CREATE:-echo created}
 
+function git_root(){
+    if [ -d ./.git ]; then 
+        echo "in git root $PWD"
+    elif [ $PWD = "/" ]; then
+        echo "Got to / and did not find a .git directory" > /dev/stderr
+        exit 1
+    else
+        pushd .. > /dev/null
+        git_root
+    fi    
+}
+
 export function worktree-remove(){
     git worktree remove $1
 }
 
 export function origin_branch(){
-    git branch -r -l "origin/${1:-*}"  --sort=committerdate | sed 's,origin/,,g;s, ,,g' | tail -2
+   git branch -a  --sort=committerdate
 }
 
 export function worktree(){
+    git_root
     BRANCH=$1
     DIRNAME="../$(basename $PWD)-$BRANCH"
 
-    if [[ $(origin_branch $BRANCH) = $BRANCH ]]; then 
+    if origin_branch | grep $BRANCH; then 
         echo "branch '$BRANCH' exists checking out into '$DIRNAME'"
         git worktree add $DIRNAME $BRANCH
         pushd 
